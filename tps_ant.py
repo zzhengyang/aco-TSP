@@ -11,12 +11,12 @@ import sys
 # distance_x = data['x'].tolist()
 # distance_y = data['y'].tolist()
 
-# 参数
+# 参数 RHO:挥发系数 Q:单个蚂蚁所携带的信息素的总量
 (ALPHA, BETA, RHO, Q) = (1.0, 2.0, 0.5, 100.0)
 # 城市数，蚁群
 (city_num, ant_num) = (50, 50)
 #信息素上下限
-PHEROMONE_MAX, PHEROMONE_MIN = 0.0, 10.0
+PHEROMONE_MIN, PHEROMONE_MAX = 0.1/city_num, 1
 # 城市坐标
 distance_x = [
     178, 272, 176, 171, 650, 499, 267, 703, 408, 437, 491, 74, 532,
@@ -314,6 +314,8 @@ class TSP(object):
         for i in xrange(city_num):
             for j in xrange(city_num):
                 pheromone_graph[i][j] = pheromone_graph[i][j] * RHO + temp_pheromone[i][j]
+                if pheromone_graph[i][j] < PHEROMONE_MIN:
+                    pheromone_graph[i][j] = PHEROMONE_MIN
                 if pheromone_graph[i][j] > PHEROMONE_MAX:
                     pheromone_graph[i][j] = PHEROMONE_MAX
     # 主循环
