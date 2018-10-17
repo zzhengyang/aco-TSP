@@ -5,7 +5,7 @@ import Tkinter
 import threading
 import pandas as pd
 import sys
-
+from matplotlib import pyplot as plt
 #读取数据
 # data = pd.read_table('tsp.dat', sep='\s+')
 # distance_x = data['x'].tolist()
@@ -235,6 +235,10 @@ class TSP(object):
         self.best_ant = Ant(-1)  # 初始最优解
         self.best_ant.total_distance = 1 << 31  # 初始最大距离
         self.iter = 1  # 初始化迭代次数
+        self.bestIter = 1 # 最佳路线解的最优迭代次数
+        self.resultDistance = 0 # 最佳路线距离
+        self.time_list = [] # 迭代次数列表
+        self.distance_list = [] # 代价列表
 
     # 将节点按order顺序连线
     def line(self, order):
@@ -254,6 +258,14 @@ class TSP(object):
         for item in self.canvas.find_all():
             self.canvas.delete(item)
 
+    # 额外图标展示
+    def analysis(self):
+        plt.plot(self.time_list, self.distance_list, label=u'aco')
+        plt.title(self.result_en)
+        plt.xlabel("iter")
+        plt.ylabel("distance")
+        plt.show()
+
     # 退出程序
     def quite(self, evt):
         self.__lock.acquire()
@@ -261,8 +273,9 @@ class TSP(object):
         self.__lock.release()
         self.root.destroy()
         print u"\n程序已退出..."
-        print u"迭代次数：", self.iter, u"最佳路径总距离：", int(self.best_ant.total_distance)
-        sys.exit()
+        self.result = u"城市点数：", city_num, u"迭代次数：", self.bestIter, u"最佳路径总距离：", int(self.resultDistance)
+        self.result_en = "cityNum:", city_num, "iterTimes:", self.bestIter, "minDistance:", int(self.resultDistance)
+        self.analysis()
 
     # 停止搜索
     def stop(self, evt):
@@ -289,7 +302,12 @@ class TSP(object):
                     self.best_ant = copy.deepcopy(ant)
             # 更新信息素
             self.__update_pheromone_gragh()
-            print u"迭代次数：", self.iter, u"最佳路径总距离：", int(self.best_ant.total_distance)
+            print u"迭代次数：", self.iter, u"路径总距离：", int(self.best_ant.total_distance)
+            self.time_list.append(self.iter)
+            self.distance_list.append(self.best_ant.total_distance)
+            if(self.best_ant.total_distance != self.resultDistance):
+                self.bestIter = self.iter
+                self.resultDistance = self.best_ant.total_distance
             # 连线
             self.line(self.best_ant.path)
             # 设置标题
